@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yjh.mapper.StuInfoMapper">
+
+    <resultMap id="getList" type="com.yjh.pojo.ClassInfo">
+        <id column="classId" property="classId"></id>
+        <result column="className" property="className"></result>
+        <result column="Dsc" property="Dsc"></result>
+        <collection property="teacherInfo" ofType="com.yjh.pojo.TeacherInfo">
+            <id column="teacherId" property="teacherId"></id>
+            <result column="teacherName" property="teacherName"></result>
+        </collection>
+    </resultMap>
+
+
+
+
+    <!--    a)	找出所有女性学员信息-->
+    <select id="getStuInfoByGirl" resultType="com.yjh.pojo.StuInfo" parameterType="com.yjh.pojo.StuInfo">
+        select *from stuinfo where stusex=#{stuSex}
+    </select>
+
+    <!--    b)	找出年龄在20-25岁之间，男性学员的信息-->
+    <select id="getBoyByAge" resultType="com.yjh.pojo.StuInfo" parameterType="com.yjh.vo.StuInfoVo">
+        SELECT *From stuinfo
+        <where>
+            <if test="max!=null and max !=''" >
+                and stuAge &lt;=#{max}
+            </if>
+            <if test="min!=null and min !=''">
+                and stuAge &gt;=#{min}
+            </if>
+            <if test="stuSex!=null and stuSex !=''">
+                and stuSex =#{stuSex}
+            </if>
+        </where>
+    </select>
+
+
+    <!--    c)	找出所有带过女性学员的老师信息(去重复)-->
+    <select id="getClassList" resultType="com.yjh.pojo.ClassInfo" parameterType="map">
+        SELECT c.*from classinfo c,stuinfo so where c.classid=so.classid and so.stusex=#{stuSex}
+    </select>
+
+
+
+
+    <!--    e)	找出1807班所有学员及带班老师信息(学员及带班老师信息可重复)-->
+    <select id="getAllList" resultMap="getList">
+        SELECT *from classinfo c,stuinfo so,teacherinfo t,stu_teach st where c.classid=so.stuId
+        and so.stuId=st.stuId and t.teacherId=st.teacherId and c.classname=#{className}
+
+    </select>
+
+
+
+
+
+
+    <!--    g)	找出老江带过的学员信息-->
+    <select id="getLaoJiangStuInfo" resultType="com.yjh.pojo.StuInfo" parameterType="com.yjh.pojo.TeacherInfo">
+        SELECT  *from teacherinfo t,stu_teach st,stuinfo so
+        where t.teacherId=st.stuId and t.teacherId=so.stuId and t.teacherName=#{teacherName}
+    </select>
+</mapper>
